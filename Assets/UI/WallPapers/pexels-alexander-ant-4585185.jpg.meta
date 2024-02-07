@@ -143,7 +143,8 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      pexels-alexander-ant-4585185_0: 127621354497921716
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

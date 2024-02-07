@@ -4,16 +4,21 @@ using System.Net;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+
+[RequireComponent(typeof(LineRenderer))]
 public class DotPuzzle : MonoBehaviour
 {
-    public LayerMask colliderLayer;
+    public LayerMask ColliderLayer;
+    public List<GameObject> CorrectDots = new List<GameObject>();
+    [SerializeField] private Color _patternCorrectColor;
+    [SerializeField] private Color _patternWrongColor;
 
     private LineRenderer _lineRenderer;
     private Vector3 _startPos;
     private bool _drawing = false;
+    private int _lineRendererIndex = 0;
     private List<RaycastResult> _results = new List<RaycastResult>();
     private List<GameObject> _dots = new List<GameObject>();
-    private int _lineRendererIndex = 0;
 
 
     void Start()
@@ -45,7 +50,8 @@ public class DotPuzzle : MonoBehaviour
             switch (touch.phase)
             {
                 case TouchPhase.Began:
-                
+
+                    
 
                     break;
 
@@ -63,6 +69,9 @@ public class DotPuzzle : MonoBehaviour
                         {
                             _dots.Add(hitObject);
 
+                            _lineRenderer.startColor = Color.white;
+                            _lineRenderer.endColor = Color.white;
+
                             _startPos = hitObject.transform.position;
                             _drawing = true;
                             _lineRenderer.enabled = true;
@@ -76,9 +85,6 @@ public class DotPuzzle : MonoBehaviour
                             Debug.Log("UI element: " + hitObject.name + " already hit");
                         }
                             
-
-  
-
                     }
                     else
                     {
@@ -97,15 +103,59 @@ public class DotPuzzle : MonoBehaviour
                 case TouchPhase.Ended:
                     if (_drawing)
                     {
-                        _lineRenderer.enabled = false;
                         _drawing = false;
-                        _lineRendererIndex = 0;
-                        _lineRenderer.positionCount = 1;
 
-                        _dots.Clear();
+                        if (IsPatternCorrect())
+                        {
+                            PuzzleCompleted();
+                        }
+                        else
+                        {
+                            StartCoroutine(PatternWrong());
+
+                            _dots.Clear();
+                        }
+
                     }
                     break;
             }
         }
+    }
+
+    void PuzzleCompleted()
+    {
+        _lineRenderer.startColor = _patternCorrectColor;
+        _lineRenderer.endColor = _patternCorrectColor;
+        _lineRenderer.positionCount--;
+    }
+
+    IEnumerator PatternWrong()
+    {
+        _lineRenderer.startColor = _patternWrongColor;
+        _lineRenderer.endColor = _patternWrongColor;
+        _lineRenderer.positionCount--;
+
+        yield return new WaitForSeconds(1f);
+
+        _lineRenderer.enabled = false;
+        _lineRendererIndex = 0;
+        _lineRenderer.positionCount = 1;
+
+    }
+
+    bool IsPatternCorrect()
+    {
+        if (_dots.Count != CorrectDots.Count)
+            return false;
+
+        for (int i = 0; i < _dots.Count; i++)
+        {
+            if (_dots[i] != CorrectDots[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
