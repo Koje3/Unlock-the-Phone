@@ -10,15 +10,20 @@ public class DotPuzzle : MonoBehaviour
 {
     public LayerMask ColliderLayer;
     public List<GameObject> CorrectDots = new List<GameObject>();
+    public GameObject LinePointPrefab;
     [SerializeField] private Color _patternCorrectColor;
     [SerializeField] private Color _patternWrongColor;
 
     private LineRenderer _lineRenderer;
     private Vector3 _startPos;
-    private bool _drawing = false;
+    private bool _currentlyDrawingPattern = false;
+    private bool _canDrawPattern = false;
     private int _lineRendererIndex = 0;
     private List<RaycastResult> _results = new List<RaycastResult>();
-    private List<GameObject> _dots = new List<GameObject>();
+    private List<GameObject> _hitDots = new List<GameObject>();
+    private GameObject _linePointsContainer;
+    private LineRenderer _currentLinerenderer;
+
 
 
     void Start()
@@ -26,6 +31,10 @@ public class DotPuzzle : MonoBehaviour
         _lineRenderer = GetComponent<LineRenderer>();
         _lineRenderer.positionCount = 1;
         _lineRenderer.enabled = false;
+
+        _canDrawPattern = true;
+        _linePointsContainer = new GameObject("LinePoints");
+        _linePointsContainer.transform.parent = this.transform;
     }
 
 
@@ -51,34 +60,25 @@ public class DotPuzzle : MonoBehaviour
             {
                 case TouchPhase.Began:
 
-                    
 
                     break;
 
                 case TouchPhase.Moved:
    
 
-                    if (_results.Count > 0)
+                    if (_canDrawPattern && _results.Count > 0)
                     {
                         // Get the first hit object
                         GameObject hitObject = _results[0].gameObject;
 
                         Debug.Log("Hit a UI element: " + hitObject.name);
 
-                        if (_dots.Contains(hitObject) == false)
+                        if (_hitDots.Contains(hitObject) == false)
                         {
-                            _dots.Add(hitObject);
+                            StartCoroutine(VibratePhone(0.1f));
 
-                            _lineRenderer.startColor = Color.white;
-                            _lineRenderer.endColor = Color.white;
+                            AddNewLineRenderer(hitObject);
 
-                            _startPos = hitObject.transform.position;
-                            _drawing = true;
-                            _lineRenderer.enabled = true;
-
-                            _lineRenderer.SetPosition(_lineRendererIndex, _startPos);
-                            _lineRendererIndex++;
-                            _lineRenderer.positionCount = _lineRendererIndex + 1;
                         }
                         else
                         {
@@ -92,18 +92,24 @@ public class DotPuzzle : MonoBehaviour
                         Debug.Log("Did not hit a UI element.");
                     }
 
-                    if (_drawing)
+                    if (_currentlyDrawingPattern && _currentLinerenderer != null)
                     {
-                        _lineRenderer.SetPosition(_lineRendererIndex, Camera.main.ScreenToWorldPoint(new Vector3(touch.position.x, touch.position.y, 5f)));
+                        _currentLinerenderer.SetPosition(1, Camera.main.ScreenToWorldPoint(new Vector3(touch.position.x, touch.position.y, 5f)));
 
                     }
 
                     break;
 
                 case TouchPhase.Ended:
-                    if (_drawing)
+                    if (_currentlyDrawingPattern)
                     {
-                        _drawing = false;
+                        _currentlyDrawingPattern = false;
+                        _canDrawPattern = false;
+                        
+                        if (_currentLinerenderer != null)
+                        {
+                            _currentLinerenderer.enabled = false;
+                        }
 
                         if (IsPatternCorrect())
                         {
@@ -113,7 +119,7 @@ public class DotPuzzle : MonoBehaviour
                         {
                             StartCoroutine(PatternWrong());
 
-                            _dots.Clear();
+                            _hitDots.Clear();
                         }
 
                     }
@@ -122,35 +128,79 @@ public class DotPuzzle : MonoBehaviour
         }
     }
 
+    void AddNewLineRenderer(GameObject hitObject)
+    {
+        _hitDots.Add(hitObject);
+        Vector3 hitObjectPosition = hitObject.transform.position;
+
+        _currentlyDrawingPattern = true;
+
+        GameObject newLinePoint = Instantiate(LinePointPrefab, hitObjectPosition, Quaternion.identity);
+        newLinePoint.transform.parent = _linePointsContainer.transform;
+        newLinePoint.name = "LinePoint" + _lineRendererIndex;
+
+        LineRenderer newLineRend = newLinePoint.GetComponent<LineRenderer>();
+        newLineRend.enabled = true;
+        newLineRend.positionCount = 2;
+        newLineRend.SetPosition(0, hitObjectPosition);
+
+        if (_currentLinerenderer != null)
+        {
+            _currentLinerenderer.SetPosition(1, hitObjectPosition);
+        }
+
+        _lineRendererIndex++;
+        _currentLinerenderer = newLineRend;
+    }
+
+    IEnumerator VibratePhone(float time)
+    {
+        Handheld.Vibrate();
+
+        yield return new WaitForSeconds(time);
+    }
+
     void PuzzleCompleted()
     {
-        _lineRenderer.startColor = _patternCorrectColor;
-        _lineRenderer.endColor = _patternCorrectColor;
-        _lineRenderer.positionCount--;
+        foreach (Transform child in _linePointsContainer.transform) 
+        {
+            LineRenderer rend = child.GetComponent<LineRenderer>();
+            rend.startColor = _patternCorrectColor;
+            rend.endColor = _patternCorrectColor;
+        }
+
+        StartCoroutine(VibratePhone(2f));
     }
 
     IEnumerator PatternWrong()
     {
-        _lineRenderer.startColor = _patternWrongColor;
-        _lineRenderer.endColor = _patternWrongColor;
-        _lineRenderer.positionCount--;
+        foreach (Transform child in _linePointsContainer.transform)
+        {
+            LineRenderer rend = child.GetComponent<LineRenderer>();
+            rend.startColor = _patternWrongColor;
+            rend.endColor = _patternWrongColor;
+        }
 
         yield return new WaitForSeconds(1f);
 
-        _lineRenderer.enabled = false;
-        _lineRendererIndex = 0;
-        _lineRenderer.positionCount = 1;
+
+        foreach (Transform child in _linePointsContainer.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        _canDrawPattern = true;
 
     }
 
     bool IsPatternCorrect()
     {
-        if (_dots.Count != CorrectDots.Count)
+        if (_hitDots.Count != CorrectDots.Count)
             return false;
 
-        for (int i = 0; i < _dots.Count; i++)
+        for (int i = 0; i < _hitDots.Count; i++)
         {
-            if (_dots[i] != CorrectDots[i])
+            if (_hitDots[i] != CorrectDots[i])
             {
                 return false;
             }

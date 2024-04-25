@@ -1,0 +1,11 @@
+# ninja log v5
+269	2921	7356915671292171	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	1b8b58f061ca24b2
+2922	4004	7356915680154231	Z:/Sekalaiset projektit/Unlock The Phone -game/Unlock-the-Phone/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/286h1k4y/obj/arm64-v8a/libswappywrapper.so	7af68db27149a01b
+259	5769	7356915699708525	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	f2022765b2a2e049
+201	6313	7356915705147192	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	a58a4037d904f5c5
+1	6457	7356915706582834	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	fb31777fcb24eeab
+264	6504	7356915707044436	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	730989e5a8e2dbd4
+149	6639	7356915708392781	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	44857fec1a7f5adf
+255	6781	7356915709832773	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	7caafbd1d76e6bd8
+57	6801	7356915710013457	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	4df59977727adbdb
+6801	6983	7356915711335779	Z:/Sekalaiset projektit/Unlock The Phone -game/Unlock-the-Phone/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/286h1k4y/obj/arm64-v8a/libgame.so	7326e7aed8b0c375

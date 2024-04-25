@@ -29,6 +29,7 @@ public class DotMatrixCreator : MonoBehaviour
     public int horizontalDots = 5;
     public int verticalDots = 5;
     public float dotSize = 20f;
+    public float padding = 0f;
     public Sprite dotImage;
     private float _horizontalSpacing;
     private float _verticalSpacing;
@@ -53,25 +54,28 @@ public class DotMatrixCreator : MonoBehaviour
         float startX = -(horizontalDots * (dotSize + _horizontalSpacing)) / 2f + (dotSize + _horizontalSpacing) / 2f;
         float startY = (verticalDots * (dotSize + _verticalSpacing)) / 2f - (dotSize + _verticalSpacing) / 2f;
 
+        int dotIndex = 1;
         // Create dots
         for (int row = 0; row < verticalDots; row++)
         {
             for (int col = 0; col < horizontalDots; col++)
             {
-                CreateDot(new Vector3(startX + col * (dotSize + _horizontalSpacing), startY - row * (dotSize + _verticalSpacing), 0));
+                CreateDot(new Vector3(startX + col * (dotSize + _horizontalSpacing), startY - row * (dotSize + _verticalSpacing), 0), dotIndex);
+                dotIndex++;
             }
         }
     }
 
-    private void CreateDot(Vector3 position)
+    private void CreateDot(Vector3 position, int index)
     {
-        GameObject dot = new GameObject("Dot", typeof(Image));
+        GameObject dot = new GameObject("Dot" + index, typeof(Image));
         dot.transform.SetParent(transform);
         RectTransform rectTransform = dot.GetComponent<RectTransform>();
 
         rectTransform.localScale = Vector3.one;
         rectTransform.sizeDelta = new Vector2(dotSize, dotSize);
         rectTransform.anchoredPosition = position;
+        rectTransform.GetComponent<Image>().raycastPadding = new Vector4(-padding,-padding,-padding,-padding);
 
         dot.GetComponent<Image>().sprite = dotImage;
     }
