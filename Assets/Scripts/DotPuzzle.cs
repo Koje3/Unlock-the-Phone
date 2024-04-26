@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 
 [RequireComponent(typeof(LineRenderer))]
@@ -13,6 +15,9 @@ public class DotPuzzle : MonoBehaviour
     public GameObject LinePointPrefab;
     [SerializeField] private Color _patternCorrectColor;
     [SerializeField] private Color _patternWrongColor;
+
+    //Siirrä tämä PuzzleManageriin
+    public Animator PuzzleAnimator;
 
     private LineRenderer _lineRenderer;
     private Vector3 _startPos;
@@ -77,6 +82,7 @@ public class DotPuzzle : MonoBehaviour
                         {
                             StartCoroutine(VibratePhone(0.1f));
 
+                            SelectDot(hitObject);
                             AddNewLineRenderer(hitObject);
 
                         }
@@ -117,9 +123,7 @@ public class DotPuzzle : MonoBehaviour
                         }
                         else
                         {
-                            StartCoroutine(PatternWrong());
-
-                            _hitDots.Clear();
+                            StartCoroutine(PatternWrong());                           
                         }
 
                     }
@@ -128,10 +132,20 @@ public class DotPuzzle : MonoBehaviour
         }
     }
 
-    void AddNewLineRenderer(GameObject hitObject)
+    void SelectDot(GameObject dot)
     {
-        _hitDots.Add(hitObject);
-        Vector3 hitObjectPosition = hitObject.transform.position;
+        _hitDots.Add(dot);
+
+        if (dot.GetComponent<Animator>() != null)
+        {
+            dot.GetComponent<Animator>().SetTrigger("Selected");
+        }
+    }
+
+    void AddNewLineRenderer(GameObject dot)
+    {
+
+        Vector3 hitObjectPosition = dot.transform.position;
 
         _currentlyDrawingPattern = true;
 
@@ -169,6 +183,21 @@ public class DotPuzzle : MonoBehaviour
             rend.endColor = _patternCorrectColor;
         }
 
+        if (PuzzleAnimator != null)
+        {
+            PuzzleAnimator.SetTrigger("Completed");
+        }
+
+        foreach (Transform child in this.transform)
+        {
+            if (child.GetComponent<Animator>() != null)
+            {
+                child.GetComponent<Animator>().SetTrigger("Completed");
+            }
+
+        }
+
+
         StartCoroutine(VibratePhone(2f));
     }
 
@@ -181,6 +210,19 @@ public class DotPuzzle : MonoBehaviour
             rend.endColor = _patternWrongColor;
         }
 
+        List<Color> originalColors = new List<Color>();
+
+        foreach (GameObject dot in _hitDots)
+        {
+            if (dot.GetComponent<Image>() != null)
+            {
+                Image dotImage = dot.GetComponent<Image>();
+                originalColors.Add(dotImage.color);
+                dotImage.color = _patternWrongColor;
+            }
+        }
+
+
         yield return new WaitForSeconds(1f);
 
 
@@ -189,7 +231,29 @@ public class DotPuzzle : MonoBehaviour
             Destroy(child.gameObject);
         }
 
+        int index = 0;
+
+        foreach (GameObject dot in _hitDots)
+        {
+            if (dot.GetComponent<Image>() != null)
+            {
+                dot.GetComponent<Image>().color = originalColors[index];
+            }
+
+            if (dot.GetComponent<Animator>() != null)
+            {
+                dot.GetComponent<Animator>().SetTrigger("UnSelected");
+            }
+
+
+
+            index++;
+
+        }
+
+        _hitDots.Clear();
         _canDrawPattern = true;
+
 
     }
 

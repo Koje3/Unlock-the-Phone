@@ -29,8 +29,9 @@ public class DotMatrixCreator : MonoBehaviour
     public int horizontalDots = 5;
     public int verticalDots = 5;
     public float dotSize = 20f;
-    public float padding = 0f;
-    public Sprite dotImage;
+    //public float padding = 0f;
+    //public Sprite dotImage;
+    public GameObject dotPrefab;
     private float _horizontalSpacing;
     private float _verticalSpacing;
 
@@ -68,16 +69,16 @@ public class DotMatrixCreator : MonoBehaviour
 
     private void CreateDot(Vector3 position, int index)
     {
-        GameObject dot = new GameObject("Dot" + index, typeof(Image));
-        dot.transform.SetParent(transform);
-        RectTransform rectTransform = dot.GetComponent<RectTransform>();
+        GameObject dot = Instantiate(dotPrefab, transform);//new GameObject("Dot" + index, typeof(Image));
+        dot.name = "Dot" + index;
 
+        RectTransform rectTransform = dot.GetComponent<RectTransform>();
         rectTransform.localScale = Vector3.one;
         rectTransform.sizeDelta = new Vector2(dotSize, dotSize);
         rectTransform.anchoredPosition = position;
-        rectTransform.GetComponent<Image>().raycastPadding = new Vector4(-padding,-padding,-padding,-padding);
 
-        dot.GetComponent<Image>().sprite = dotImage;
+        //rectTransform.GetComponent<Image>().raycastPadding = new Vector4(-padding,-padding,-padding,-padding);
+        //dot.GetComponent<Image>().sprite = dotImage;
     }
 
     private void ClearDotMatrix()
