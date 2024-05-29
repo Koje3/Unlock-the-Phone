@@ -1651,6 +1651,7 @@ MonoBehaviour:
   _patternCorrectColor: {r: 0.62705666, g: 0.990566, b: 0.40650588, a: 1}
   _patternWrongColor: {r: 0.9622642, g: 0.36765754, b: 0.36765754, a: 1}
   PuzzleAnimator: {fileID: 1221057232}
+  BackgroundAnimator: {fileID: 1269889514}
 --- !u!1 &1825492405
 GameObject:
   m_ObjectHideFlags: 0

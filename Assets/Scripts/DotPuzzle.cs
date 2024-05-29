@@ -18,6 +18,7 @@ public class DotPuzzle : MonoBehaviour
 
     //Siirrä tämä PuzzleManageriin
     public Animator PuzzleAnimator;
+    public Animator BackgroundAnimator;
 
     private LineRenderer _lineRenderer;
     private Vector3 _startPos;
@@ -176,16 +177,16 @@ public class DotPuzzle : MonoBehaviour
 
     void PuzzleCompleted()
     {
-        foreach (Transform child in _linePointsContainer.transform) 
-        {
-            LineRenderer rend = child.GetComponent<LineRenderer>();
-            rend.startColor = _patternCorrectColor;
-            rend.endColor = _patternCorrectColor;
-        }
+        StartCoroutine(LineCompleted());
 
         if (PuzzleAnimator != null)
         {
             PuzzleAnimator.SetTrigger("Completed");
+        }
+
+        if (BackgroundAnimator != null)
+        {
+            BackgroundAnimator.SetTrigger("Completed");
         }
 
         foreach (Transform child in this.transform)
@@ -197,9 +198,51 @@ public class DotPuzzle : MonoBehaviour
 
         }
 
-
         StartCoroutine(VibratePhone(2f));
     }
+
+    IEnumerator LineCompleted()
+    {
+        List<LineRenderer> lineRenderers = new List<LineRenderer>();
+
+        foreach (Transform child in _linePointsContainer.transform)
+        {
+            LineRenderer rend = child.GetComponent<LineRenderer>();
+            if (rend != null) 
+            {
+                lineRenderers.Add(rend);
+                rend.startColor = _patternCorrectColor;
+                rend.endColor = _patternCorrectColor;
+            }
+        }
+
+        float waitTime = 0.5f;
+        float elapsedTime = 0f;
+
+        Color lerpEndColor = new Color(_patternCorrectColor.r, _patternCorrectColor.g, _patternCorrectColor.b, 0f);
+
+        while (elapsedTime < waitTime)
+        {
+
+            Color newColor = Color.Lerp(_patternCorrectColor, lerpEndColor, elapsedTime/waitTime);
+
+            foreach (LineRenderer rend in lineRenderers)
+            {
+                rend.material.SetColor("_Color", newColor);
+            }
+
+            elapsedTime += Time.deltaTime;
+
+            yield return null;
+        }
+
+        //Make sure the color changes all the way
+        foreach (LineRenderer rend in lineRenderers)
+        {
+            rend.material.SetColor("_Color", lerpEndColor);
+        }
+    }
+   
 
     IEnumerator PatternWrong()
     {
